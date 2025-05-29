@@ -7,16 +7,17 @@
     "icon": "src/assets/logo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    
     "ios": {
       "supportsTablet": true
     },
     "android": {
-      
       "edgeToEdgeEnabled": true
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-font"
+    ]
   }
 }
