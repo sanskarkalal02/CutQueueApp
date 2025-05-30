@@ -5,10 +5,13 @@ import LogoPic from '../src/assets/logoPic';
 import BackgroundImage from "../src/assets/background-img";
 import { s } from "react-native-size-matters";
 import React from "react";
+import { useFonts } from "expo-font";
 
 export default function LoginScreen() {
 
-
+const [fontsLoaded] = useFonts({
+    'Montserrat': require('../src/assets/fonts/Montserrat-SemiBold.ttf'),
+  })
 const [password,setPassword] = useState("");
 const [email,setEmail]  = useState("");
 
@@ -37,7 +40,7 @@ console.log(email +'   '+ password)
             onChangeText={setPassword}
           ></TextInput>
           <TouchableOpacity activeOpacity={0.8} style={styles.button}>
-            <Text style={{ fontSize: 15, color: "black", fontWeight: '800' }}>
+            <Text style={{ fontSize: s(15), color: "black",fontFamily:'Montserrat' }}>
               Sign In
             </Text>
           </TouchableOpacity>
@@ -61,12 +64,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   logo: {
-    maxHeight: 150,
-    maxWidth: 150,
+    maxHeight: 170,
+    maxWidth: 170,
     backgroundColor:'white',
     borderRadius:200,
     elevation:10,
-    margin: 10
+    margin: 20,
+    padding:10
   },
   textInput: {
     height: s(35),
@@ -90,5 +94,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "white",
     borderRadius: 10,
+    
   },
 });
