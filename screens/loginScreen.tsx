@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     backgroundColor:'white',
     elevation: 20,
-    padding:10
+    paddingLeft:10
   },
   button: {
     width: "50%",
