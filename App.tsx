@@ -6,7 +6,7 @@ import LocationComp from './src/components/location'
 
 const App = () => {
   return(
-    <LoginScreen />
+    <BarberRegistrationScreen />
   );
 }
 export default App;
