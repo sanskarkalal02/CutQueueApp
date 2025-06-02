@@ -6,6 +6,7 @@ import BackgroundImage from "../src/assets/background-img";
 import { s } from "react-native-size-matters";
 import React from "react";
 import { useFonts } from "expo-font";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 export default function LoginScreen() {
 
@@ -14,6 +15,8 @@ const [fontsLoaded] = useFonts({
   })
 const [password,setPassword] = useState("");
 const [email,setEmail]  = useState("");
+const {name,params} = useRoute();
+const navigation = useNavigation<any>();
 
 console.log(email +'   '+ password)
 
@@ -23,33 +26,94 @@ console.log(email +'   '+ password)
         style={styles.backgroundImage}
         source={require("../src/assets/background-img.png")}
       >
-          <LogoPic style={styles.logo} />
-          <TextInput
-            style={styles.textInput}
-            keyboardType="email-address"
-            placeholder="Enter Email"
-            value={email}
-            onChangeText={setEmail}
-          ></TextInput>
-          <TextInput
-            style={styles.textInput}
-            keyboardType="visible-password"
-            placeholder="Enter Password"
-            secureTextEntry={true}
-            value={password}
-            onChangeText={setPassword}
-          ></TextInput>
-          <TouchableOpacity activeOpacity={0.8} style={styles.button}>
-            <Text style={{ fontSize: s(15), color: "black",fontFamily:'Montserrat' }}>
-              Sign In
-            </Text>
-          </TouchableOpacity>
+        <LogoPic style={styles.logo} />
+        <TextInput
+          style={styles.textInput}
+          keyboardType="email-address"
+          placeholder="Enter Email"
+          value={email}
+          onChangeText={setEmail}
+        ></TextInput>
+        <TextInput
+          style={styles.textInput}
+          keyboardType="visible-password"
+          placeholder="Enter Password"
+          secureTextEntry={true}
+          value={password}
+          onChangeText={setPassword}
+        ></TextInput>
+        <TouchableOpacity disabled = {!(password && email)} activeOpacity={0.7} style={(password && email) ? styles.button : styles.inactive}>
+          <Text
+            style={{
+              fontSize: s(15),
+              color: "black",
+              fontFamily: "Montserrat",
+              textShadowColor:'black',
+              textShadowRadius:3,
+              
+            }}
+          >
+            Sign In
+          </Text>
+        </TouchableOpacity>
+
+        <View
+          style={{
+            flex: 0,
+            flexDirection: "row",
+            justifyContent: "center",
+            alignContent: "center",
+          }}
+        >
+          <Text
+            style={{
+              textShadowColor: "black",
+              color: "white",
+              fontWeight: "semibold",
+              fontSize: 15,
+              textShadowRadius: 12,
+              marginRight: 10,
+            }}
+          >
+            Haven't Signed Up Yet?
+          </Text>
+
+          <Pressable
+            onPress={() => {
+              navigation.navigate("barberReg");
+            }}
+          >
+            <Text style={styles.underline}>Sign Up</Text>
+          </Pressable>
+        </View>
+        <View style={{flexDirection:'row', alignItems:'center'}}>
+          <View style={styles.line} />
+          <Text style={{color:'white', marginHorizontal:10, textShadowColor:'black',textShadowRadius:10}}>OR</Text>
+          <View style={styles.line} />
+        </View>
+
+        <Pressable
+          onPress={() => {
+            navigation.navigate("barberReg");
+          }}
+        >
+          <Text style={styles.underline}>Register as a Barber</Text>
+        </Pressable>
       </ImageBackground>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  underline:{
+              textShadowColor: "black",
+              color: "white",
+              fontWeight: "semibold",
+              textDecorationLine: "underline",
+              textShadowRadius:12,
+              textShadowOffset:{height: 1,width: 2},
+              
+          },
   backgroundImage: {
     flex: 1,
     height: "100%",
@@ -89,11 +153,29 @@ const styles = StyleSheet.create({
     height: s(40),
     elevation:10,
     marginTop:s(20),
-    marginBottom:s(160),
+    marginBottom:s(50),
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "white",
     borderRadius: 10,
     
   },
+  line: {
+    flex: 0,
+    width:'30%',
+    height: StyleSheet.hairlineWidth, // very thin line
+    backgroundColor: "#fff",
+  },
+  inactive:{
+    width: "50%",
+    height: s(40),
+    elevation:10,
+    marginTop:s(20),
+    marginBottom:s(50),
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "white",
+    borderRadius: 10,
+    opacity: 0.7
+  }
 });

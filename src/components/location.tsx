@@ -1,84 +1,232 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
-import * as Location from 'expo-location'; // or use react-native-geolocation-service
-import { s, vs } from 'react-native-size-matters';
+// src/components/GooglePlacesLocationPicker.tsx
 
+import React, { useState, useEffect, useRef } from "react";
+import {
+  View,
+  TextInput,
+  FlatList,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+  Keyboard,
+} from "react-native";
 
+type Suggestion = {
+  place_id: string;
+  description: string;
+};
 
-export default function LocationComp() {
-  interface Coords {
-    latitude: number;
-    longitude: number;
-  }
-  const [location, setLocation] = useState<Coords | null>(null);
-  const [error, setError] = useState<string | null>(null);
+type LocationResult = {
+  description: string;
+  latitude: number;
+  longitude: number;
+};
 
-  // 1. Get permission and location
+type Props = {
+  /**
+   * Called once the user selects a suggestion and we have lat/lng.
+   * Receives { description, latitude, longitude }.
+   */
+  onLocationSelected: (loc: LocationResult) => void;
+
+  /**
+   * Placeholder text for the input.
+   */
+  placeholder?: string;
+
+  /**
+   * If you want to restrict autocomplete to a certain country (ISO 2-letter), e.g. "us" or "in".
+   */
+  countryCodes?: string;
+};
+
+const GOOGLE_API_KEY = "AIzaSyC9O0Rsw_h1MRsFk6JHY3WWyVDUarZR3Mc";
+
+export default function GooglePlacesLocationPicker({
+  onLocationSelected,
+  placeholder = "Type an address…",
+  countryCodes,
+}: Props) {
+  const [query, setQuery] = useState<string>("");
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState<boolean>(false);
+  const [loadingDetails, setLoadingDetails] = useState<boolean>(false);
+
+  // A ref to store the current debounce timer
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+
+  // Whenever `query` changes, wait 300 ms then fetch autocomplete
   useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setError('Location permission denied');
-        return;
-      }
-      let loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest });
-      setLocation(loc.coords);
-    })();
-  }, []);
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
 
-  // 2. While loading
-  if (!location) {
-    return (
-      <View style={styles.loader}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
+    if (query.length < 3) {
+      setSuggestions([]);
+      return;
+    }
+
+    setLoadingSuggestions(true);
+    debounceTimer.current = setTimeout(() => {
+      fetchAutocomplete(query);
+    }, 300);
+
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, [query]);
+
+  // Fetch autocomplete suggestions from Google Places API
+  async function fetchAutocomplete(text: string) {
+    try {
+      const encoded = encodeURIComponent(text);
+      let url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encoded}&key=${GOOGLE_API_KEY}`;
+      // Limit to geocoded addresses (optional)
+      url += `&types=geocode`;
+      if (countryCodes) {
+        url += `&components=country:${countryCodes}`;
+      }
+
+      const response = await fetch(url);
+      const json = await response.json();
+
+      if (json.status === "OK" && Array.isArray(json.predictions)) {
+        const data: Suggestion[] = json.predictions.map((p: any) => ({
+          place_id: p.place_id,
+          description: p.description,
+        }));
+        setSuggestions(data);
+      } else {
+        setSuggestions([]);
+      }
+    } catch (err) {
+      console.warn("Autocomplete error:", err);
+      setSuggestions([]);
+    } finally {
+      setLoadingSuggestions(false);
+    }
   }
 
-  // 3. Render map
+  // When a suggestion is tapped, fetch place details to get lat/lng
+  async function handleSelectSuggestion(item: Suggestion) {
+    setLoadingDetails(true);
+    setSuggestions([]);
+    setQuery(item.description); // show the selected description
+    Keyboard.dismiss();
+
+    try {
+      const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${item.place_id}&key=${GOOGLE_API_KEY}`;
+      const response = await fetch(url);
+      const json = await response.json();
+
+      if (
+        json.status === "OK" &&
+        json.result &&
+        json.result.geometry &&
+        json.result.geometry.location
+      ) {
+        const {
+          lat,
+          lng,
+        } = json.result.geometry.location as { lat: number; lng: number };
+
+        onLocationSelected({
+          description: item.description,
+          latitude: lat,
+          longitude: lng,
+        });
+      } else {
+        console.warn("Place Details failed:", json.status);
+      }
+    } catch (err) {
+      console.warn("Place Details error:", err);
+    } finally {
+      setLoadingDetails(false);
+    }
+  }
+
   return (
     <View style={styles.container}>
-      <MapView
-        style={styles.map}
-        initialRegion={{
-          latitude: location.latitude,
-          longitude: location.longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        }}
-        showsUserLocation={true} // optional: shows the blue dot
-        showsMyLocationButton={true} // Android only
-      >
-        <Marker
-          coordinate={{
-            latitude: location.latitude,
-            longitude: location.longitude,
-          }}
-          title="You are here"
+      <TextInput
+        style={styles.textInput}
+        placeholder={placeholder}
+        value={query}
+        onChangeText={setQuery}
+        autoCapitalize="none"
+        autoCorrect={false}
+        clearButtonMode="while-editing"
+      />
+
+      {loadingSuggestions && (
+        <View style={styles.loadingWrapper}>
+          <ActivityIndicator size="small" color="#444" />
+        </View>
+      )}
+
+      {suggestions.length > 0 && (
+        <FlatList
+          keyboardShouldPersistTaps="handled"
+          data={suggestions}
+          keyExtractor={(item) => item.place_id}
+          style={styles.suggestionsList}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.suggestionItem}
+              onPress={() => handleSelectSuggestion(item)}
+            >
+              <Text style={styles.suggestionText}>
+                {item.description}
+              </Text>
+            </TouchableOpacity>
+          )}
         />
-      </MapView>
+      )}
+
+      {loadingDetails && (
+        <View style={styles.loadingWrapper}>
+          <ActivityIndicator size="large" color="#444" />
+        </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container:{
-  width:s(300),
-  height: vs(140),
-  marginTop:10
-
+  container: {
+    width: "100%",
+    zIndex: 100, // to float suggestions above other siblings
   },
-  map: {
-    flex:1,
-    borderRadius:20,
-   
+  textInput: {
+    height: 48,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    fontSize: 16,
+    backgroundColor: "#fff",
   },
-  loader: {
-    width:s(300),
-    height: vs(140),
-    marginTop:10,
-    justifyContent: 'center',
-    alignItems: 'center',
+  loadingWrapper: {
+    position: "absolute",
+    right: 12,
+    top: 12,
+  },
+  suggestionsList: {
+    marginTop: 4,
+    borderRadius: 6,
+    borderColor: "#eee",
+    borderWidth: 1,
+    backgroundColor: "#fff",
+    maxHeight: 200, // limit height
+  },
+  suggestionItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderBottomColor: "#f2f2f2",
+    borderBottomWidth: 1,
+  },
+  suggestionText: {
+    fontSize: 16,
+    color: "#333",
   },
 });
