@@ -6,13 +6,12 @@ import LocationComp from './src/components/location'
 import { NavigationContainer } from '@react-navigation/native'
 import MainStackNavigator from './src/navigation/MainStackNavigator'
 import LocationPickerScreen from './src/components/locationPicker'
+import PhotoPicker from './src/components/imagePicker'
 
 const App = () => {
-  return(
-          // <LocationPickerScreen />
-    
+  return (
     <NavigationContainer>
-      <MainStackNavigator/>
+      <MainStackNavigator />
     </NavigationContainer>
   );
 }

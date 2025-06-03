@@ -1,6 +1,7 @@
 import { createStackNavigator } from "@react-navigation/stack";
 import LoginScreen from "../../screens/loginScreen";
 import BarberRegistrationScreen from "../../screens/barberRegistrationScreen";
+import CustomerRegistrationScreen from "../../screens/customerRegistrationScreen";
 
 const Stack = createStackNavigator();
 
@@ -11,6 +12,10 @@ return (
     <Stack.Screen options= {{headerShown:false}}
       name="barberReg"
       component={BarberRegistrationScreen}
+    />
+    <Stack.Screen options= {{headerShown:false}}
+      name="customerReg"
+      component={CustomerRegistrationScreen}
     />
   </Stack.Navigator>
 );

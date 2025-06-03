@@ -80,7 +80,7 @@ console.log(email +'   '+ password)
 
           <Pressable
             onPress={() => {
-              navigation.navigate("barberReg");
+              navigation.navigate("customerReg");
             }}
           >
             <Text style={styles.underline}>Sign Up</Text>
