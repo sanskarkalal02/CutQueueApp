@@ -1,5 +1,5 @@
 // src/components/GooglePlacesLocationPicker.tsx
-
+import {GOOGLE_API_KEY} from '../apis/googleAPI'
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
@@ -41,7 +41,7 @@ type Props = {
   countryCodes?: string;
 };
 
-const GOOGLE_API_KEY = "AIzaSyC9O0Rsw_h1MRsFk6JHY3WWyVDUarZR3Mc";
+
 
 export default function GooglePlacesLocationPicker({
   onLocationSelected,
