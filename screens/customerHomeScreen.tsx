@@ -1,14 +1,33 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet,Image, Text, View } from 'react-native'
 import React from 'react'
+import { useRoute } from '@react-navigation/native'
+import { s, vs } from 'react-native-size-matters';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-const customerHomeScreen = () => {
+type CustomerInfo = {
+  imageURI?: string;
+  userName?: string;
+};
+
+const CustomerHomeScreen = () => {
+  const route = useRoute();
+  const params = (route as { params?: CustomerInfo }).params || {};
+
   return (
-    <View>
-      <Text>customerHomeScreen</Text>
-    </View>
-  )
+    <SafeAreaView>
+      {/* <Image source={{ uri: params?.imageURI }} style={styles.profilePic} /> */}
+
+
+      <Text>Hi {params.userName} !</Text>
+    </SafeAreaView>
+  );
 }
 
-export default customerHomeScreen
+export default CustomerHomeScreen
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({ profilePic: {
+
+    width:s(50),
+    height:vs(50),
+    borderRadius:100
+} });

@@ -2,21 +2,35 @@ import { ImageBackground, StyleSheet, Text, TextInput, TouchableOpacity, View } 
 import React, { useState } from 'react'
 import { s, vs } from 'react-native-size-matters';
 import PhotoPicker from '../src/components/imagePicker';
+import { CommonActions, useNavigation, useRoute } from '@react-navigation/native';
 
 
 let customerInfo: { [key: string]: any } = {};
 export default function CustomerRegistrationScreen() {
-  const [name, setName] = useState("");
+
+  const navigation = useNavigation<any>();
+  const {name,params} = useRoute();
+
+  const [userName, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
 
   const register= () => {
-  customerInfo['name'] = name
+  customerInfo['userName'] = userName
   customerInfo['email'] = email
   customerInfo['password'] = password
   
-  console.log(customerInfo)
+  console.log(customerInfo);
+  
+  navigation.dispatch(
+    CommonActions.reset({
+      index: 0,
+      routes: [{ name: "customerHome",params: customerInfo }],
+    })
+  );
+  
+  
 } 
 
   return (
@@ -39,7 +53,7 @@ export default function CustomerRegistrationScreen() {
           style={styles.textInput}
           keyboardType="default"
           placeholder="Enter Name"
-          value={name}
+          value={userName}
           onChangeText={setName}
         ></TextInput>
         <TextInput
@@ -70,12 +84,12 @@ export default function CustomerRegistrationScreen() {
 
         <TouchableOpacity
           style={
-            !(name  && email && password && confirmPass)
+            !(userName  && email && password && confirmPass)
               ? styles.inactive
               : styles.register
           }
           onPress={() =>register()}
-          disabled={!(name && email && password && confirmPass)}
+          disabled={!(userName && email && password && confirmPass)}
         >
           <Text
             style={{ fontFamily: "Montserrat", fontSize: 20, color: "white" }}
