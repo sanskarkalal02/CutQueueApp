@@ -4,8 +4,11 @@ import BarberRegistrationScreen from "../../screens/barberRegistrationScreen";
 import CustomerRegistrationScreen from "../../screens/customerRegistrationScreen";
 import customerHomeScreen from "../../screens/customerHomeScreen";
 import CustomerHomeScreen from "../../screens/customerHomeScreen";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import BottomTabsNavigator from "./BottomTabsNavigator";
 
 const Stack = createStackNavigator();
+
 
 function MainStackNavigator(){
 return (
@@ -28,14 +31,15 @@ return (
     <Stack.Screen
       options={{
         headerShown: false,
-        gestureEnabled: false,
-        // Remove the back button and prevent gestures
-        headerLeft: () => null,
       }}
-      name="customerHome"
-      component={CustomerHomeScreen}
+      name="Home" 
+      component={BottomTabsNavigator}
     />
+    
   </Stack.Navigator>
+  
+
+  
 );
 
 }

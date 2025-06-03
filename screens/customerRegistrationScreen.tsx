@@ -20,15 +20,16 @@ export default function CustomerRegistrationScreen() {
   customerInfo['userName'] = userName
   customerInfo['email'] = email
   customerInfo['password'] = password
+  customerInfo['role'] = 'user'
   
   console.log(customerInfo);
   
   navigation.dispatch(
     CommonActions.reset({
-      index: 0,
-      routes: [{ name: "customerHome",params: customerInfo }],
+      index:0,
+      routes: [{ name: "Home" }]
     })
-  );
+  )
   
   
 } 
